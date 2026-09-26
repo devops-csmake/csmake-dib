@@ -23,6 +23,7 @@ import collections
 import os
 import sys
 import pickle
+import base64
 import re
 
 class DIBRunParts(CsmakeModule):
@@ -380,9 +381,12 @@ class DIBRunParts(CsmakeModule):
             success = False
             self.log.exception('DIBRunParts exited on exception')
         finally:
-            self.dibenv['logconfig'].set('environment', 'pickle', pickle.dumps(self.newenv))
+            self.dibenv['logconfig'].set(
+                'environment',
+                'pickle',
+                base64.b64encode(pickle.dumps(self.newenv)).decode('ascii'))
             self.log.devdebug("()()  Writing DIB Progress logfile  ()()")
-            with file(self.dibenv['logfile'], 'w') as f:
+            with open(self.dibenv['logfile'], 'w') as f:
                 self.dibenv['logconfig'].write(f)
                 f.close()
             self.log.devdebug("Wrote logfile")

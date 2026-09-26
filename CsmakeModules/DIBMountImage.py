@@ -108,7 +108,8 @@ class DIBMountImage(CsmakeModule):
         p = subprocess.Popen(
             ['sudo', 'losetup', '--show', '-f', dibenv['imagedir']],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE )
+            stderr=subprocess.PIPE,
+            universal_newlines=True )
         pout, perr = p.communicate()
         if p.returncode != 0:
             self.log.error("Creating loopback device for image failed")
@@ -136,7 +137,7 @@ class DIBMountImage(CsmakeModule):
 
             dibenv['shellenv']['TMP_BUILD_DIR'] = dibenv['build-dir']
 
-            for part, values in dibenv['partitions'].iteritems():
+            for part, values in dibenv['partitions'].items():
                 if 'root' in values:
                     rootdev = loopbackDevice + values['lopart']
                     dibenv['shellenv']['IMAGE_BLOCK_DEVICE'] = rootdev

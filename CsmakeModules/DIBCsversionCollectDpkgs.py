@@ -54,7 +54,8 @@ class DIBCsversionCollectDpkgs(CsmakeModule):
                  "dpkg-query", "--show", 
                  "-f", "${binary:Package} (${Version})\\n"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE )
+            stderr=subprocess.PIPE,
+            universal_newlines=True )
         out, err = p.communicate()
         dpkgs = out.split('\n')
         for dpkg in dpkgs:

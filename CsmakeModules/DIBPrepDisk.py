@@ -119,7 +119,7 @@ class DIBPrepDisk(CsmakeModule):
 
         #find the root label - this will be where we drop our payload
         rootpartition = None
-        for key, value in partitions.iteritems():
+        for key, value in partitions.items():
             if value['label'] == rootlabel:
                 rootpartition = key
                 value['root'] = True
@@ -131,7 +131,8 @@ class DIBPrepDisk(CsmakeModule):
             p = subprocess.Popen(
                 ['sudo', 'losetup', '--show', '-f', dibenv['imagedir']],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE )
+                stderr=subprocess.PIPE,
+                universal_newlines=True )
             pout, perr = p.communicate()
             if p.returncode != 0:
                 self.log.error("Creating loopback device for image failed")
@@ -154,8 +155,7 @@ class DIBPrepDisk(CsmakeModule):
                 self.log.failed()
                 return None
             startPercent = 0
-            keys = partitions.keys()
-            keys.sort()
+            keys = sorted(partitions.keys())
             partcount = 0
             for part in keys:
                 if startPercent >= 100:
@@ -217,7 +217,7 @@ class DIBPrepDisk(CsmakeModule):
             if result != 0:
                 self.log.warning("settle failed")
             #Make the filesystems
-            for part, values in partitions.iteritems():
+            for part, values in partitions.items():
                 if 'swap' in values['fs']:
                     continue
                 result = subprocess.call(

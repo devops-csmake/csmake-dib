@@ -60,7 +60,7 @@ class DIBRepo(CsmakeModuleAllPhase):
         if 'ref' in options:
             reporef = options['ref']
             (ref, reftype) = GitProvider.splitRepoReference(reporef)
-            print ref, reftype
+            print(ref, reftype)
             ref = self.env.doSubstitutions(ref)
             self.log.info("Setting DIB_REPOREF_%s", ref)
             result['DIB_REPOREF_%s'%reponame] = ref
