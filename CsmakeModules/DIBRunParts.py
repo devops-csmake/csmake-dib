@@ -173,7 +173,10 @@ class DIBRunParts(CsmakeModule):
                     scripts.append((num, fileitem))
                 else:
                     self.log.warning("Skipping executable file: %s", fileitem)
-        scripts.sort()
+        #Numbered scripts sort first (numerically), then unnumbered scripts
+        # by name.  (Python 3 can't compare the int prefix with the '' that
+        # unnumbered scripts get, so sort on an explicit key.)
+        scripts.sort(key=lambda item: (item[0] == '', item[0] or 0, item[1]))
 
         #Drive through the list of parts
         success = True
