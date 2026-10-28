@@ -15,7 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
 from CsmakeModules.DIBRunPartsAspect import DIBRunPartsAspect
-import urlparse
+import urllib.parse as urlparse
+import base64
 import os.path
 import os
 from datetime import datetime
@@ -83,7 +84,7 @@ class DIBCsversionRecordSourceRepository(DIBRunPartsAspect):
             'PATH':downloadPath,
             'SHA1':sha,
             'URL' :url,
-            'BUILD_INDEX' :url.encode('base64', 'strict').replace('\n', ''),
+            'BUILD_INDEX' :base64.b64encode(url.encode()).decode('ascii').replace('\n', ''),
             'TIME':downloadTime,
             'INJECTED':local } )
         return (name, entry)
@@ -95,7 +96,7 @@ class DIBCsversionRecordSourceRepository(DIBRunPartsAspect):
             'NAME':name,
             'SHA1':sha,
             'URL' :url,
-            'BUILD_INDEX' : url.encode('base64', 'strict').replace('\n', ''),
+            'BUILD_INDEX' : base64.b64encode(url.encode()).decode('ascii').replace('\n', ''),
             'TIME':downloadTime,
             'FILES': (local, tarfiles) } )
         return (name, entry)

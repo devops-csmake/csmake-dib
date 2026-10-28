@@ -58,7 +58,7 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
 
     def _replace(self, options):
         replaceText = self._filterLinePad(options, options['replace'])
-        with file(self.targetFile, 'w') as openTarget:
+        with open(self.targetFile, 'w') as openTarget:
             openTarget.write(replaceText)
 
     def _replaceFile(self, options):
@@ -73,7 +73,8 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
             ['patch', self.targetFile],
             stdout=self.log.out(),
             stderr=self.log.err(),
-            stdin=subprocess.PIPE )
+            stdin=subprocess.PIPE,
+            universal_newlines=True )
         process.stdin.write(patchText)
         process.stdin.close()
         result = process.wait()
@@ -87,13 +88,13 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
 
     def _append(self, options):
         appendText = self._filterLinePad(options, options['append'])
-        with file(self.targetFile, 'a') as openTarget:
+        with open(self.targetFile, 'a') as openTarget:
             openTarget.write(appendText)
 
     def _appendFile(self, options):
         sourceFile = self.env.doSubstitutions(options['append-file'])
-        with file(self.targetFile, 'a') as openTarget:
-            with file(sourceFile) as source:
+        with open(self.targetFile, 'a') as openTarget:
+            with open(sourceFile) as source:
                 openTarget.writelines(source.readlines())
 
     def _setFileMode(self, path, mode):
@@ -109,7 +110,7 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
         return True
 
     def _setPermissiveMode(self, path):
-        oldMode = oct(os.stat(self.dirpath).st_mode & 0777)[1:]
+        oldMode = oct(os.stat(self.dirpath).st_mode & 0o777)[2:]
         if not self._setFileMode(path, '777'):
             self.log.error("Could not set permissive move on '%s'",
                 path )
@@ -170,7 +171,7 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
         #Save the mode string for the dir to restore it on exit
 
         if os.path.exists(self.targetFile):
-            self.realFileMode = oct(os.stat(self.targetFile).st_mode & 0777)[1:]
+            self.realFileMode = oct(os.stat(self.targetFile).st_mode & 0o777)[2:]
             result = subprocess.call(
                 ['sudo', 'chmod', '777', self.targetFile],
                 stdout = self.log.out(),
@@ -180,7 +181,7 @@ class DIBTemporaryFileHack(DIBRunPartsAspect):
             shutil.copy2(self.targetFile, self.tempFile)
         else:
             #Go ahead and touch the file
-            with file(self.targetFile, 'w') as openTarget:
+            with open(self.targetFile, 'w') as openTarget:
                 openTarget.write('')
         if 'replace' in options:
             self._replace(options)

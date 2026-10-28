@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
-from Csmake.CsmakeModule import CsmakeModule
+from CsmakeCore.CsmakeModule import CsmakeModule
 import subprocess
 import re
 
@@ -54,7 +54,8 @@ class DIBCsversionCollectDpkgs(CsmakeModule):
                  "dpkg-query", "--show", 
                  "-f", "${binary:Package} (${Version})\\n"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE )
+            stderr=subprocess.PIPE,
+            universal_newlines=True )
         out, err = p.communicate()
         dpkgs = out.split('\n')
         for dpkg in dpkgs:

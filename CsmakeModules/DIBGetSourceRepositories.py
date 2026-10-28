@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
-from Csmake.CsmakeModule import CsmakeModule
+from CsmakeCore.CsmakeModule import CsmakeModule
 from CsmakeProviders.GitProvider import GitProvider
 from CsmakeModules.DIBRunParts import DIBRunParts
 import os.path
@@ -24,7 +24,7 @@ import os
 import re
 import subprocess
 import tempfile
-import urlparse
+import urllib.parse as urlparse
 from datetime import datetime
 
 class DIBGetSourceRepositories(CsmakeModule):
@@ -324,7 +324,7 @@ class DIBGetSourceRepositories(CsmakeModule):
                                 failed = True
                                 continue
                             sha = None
-                            with file(temptarball) as myfile:
+                            with open(temptarball, 'rb') as myfile:
                                 sha = self._fileSHA1(myfile)
                             downloadTime = datetime.utcnow().isoformat()
                             result = subprocess.call(
@@ -350,12 +350,13 @@ class DIBGetSourceRepositories(CsmakeModule):
                                 targetRepo )
                               
                             proc = subprocess.Popen(
-                                [ 'sudo', '-E', 'rsync', '-av', '--remove-source-files', 
+                                [ 'sudo', '-E', 'rsync', '-av', '--remove-source-files',
                                 sourcepull,
                                 targetdrop ],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                env=dibenv['shellenv'] )
+                                env=dibenv['shellenv'],
+                                universal_newlines=True )
                             out, err = proc.communicate()
                             if proc.returncode != 0:
                                 self.log.error("TAR repo failed to inject")
@@ -403,7 +404,7 @@ class DIBGetSourceRepositories(CsmakeModule):
                                 failed = True
                                 continue
                             sha = None
-                            with file(filepath) as myfile:
+                            with open(filepath, 'rb') as myfile:
                                 sha = self._fileSHA1(myfile)
                             pullResult = (
                                 filepath, sha, datetime.utcnow().isoformat())
@@ -484,7 +485,7 @@ class DIBGetSourceRepositories(CsmakeModule):
             if tempdir is not None and \
                 not self.flowcontrol.advice('doNotDeleteTemp'):
                 shutil.rmtree(tempdir)
-            with file(dibenv['logfile'], 'w') as f:
+            with open(dibenv['logfile'], 'w') as f:
                 dibenv['logconfig'].write(f)
             
         if failed:

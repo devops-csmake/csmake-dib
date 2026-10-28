@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
-from Csmake.CsmakeModule import CsmakeModule
-from Csmake.ShellPassEnv import ShellPassEnv
+from CsmakeCore.CsmakeModule import CsmakeModule
+from CsmakeCore.ShellPassEnv import ShellPassEnv
 import subprocess
 import os.path
 import argparse
@@ -23,6 +23,7 @@ import collections
 import os
 import sys
 import pickle
+import base64
 import re
 
 class DIBRunParts(CsmakeModule):
@@ -172,7 +173,10 @@ class DIBRunParts(CsmakeModule):
                     scripts.append((num, fileitem))
                 else:
                     self.log.warning("Skipping executable file: %s", fileitem)
-        scripts.sort()
+        #Numbered scripts sort first (numerically), then unnumbered scripts
+        # by name.  (Python 3 can't compare the int prefix with the '' that
+        # unnumbered scripts get, so sort on an explicit key.)
+        scripts.sort(key=lambda item: (item[0] == '', item[0] or 0, item[1]))
 
         #Drive through the list of parts
         success = True
@@ -380,9 +384,12 @@ class DIBRunParts(CsmakeModule):
             success = False
             self.log.exception('DIBRunParts exited on exception')
         finally:
-            self.dibenv['logconfig'].set('environment', 'pickle', pickle.dumps(self.newenv))
+            self.dibenv['logconfig'].set(
+                'environment',
+                'pickle',
+                base64.b64encode(pickle.dumps(self.newenv)).decode('ascii'))
             self.log.devdebug("()()  Writing DIB Progress logfile  ()()")
-            with file(self.dibenv['logfile'], 'w') as f:
+            with open(self.dibenv['logfile'], 'w') as f:
                 self.dibenv['logconfig'].write(f)
                 f.close()
             self.log.devdebug("Wrote logfile")

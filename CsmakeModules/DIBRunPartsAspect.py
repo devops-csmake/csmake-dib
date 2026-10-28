@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
-from Csmake.CsmakeAspect import CsmakeAspect
+from CsmakeCore.CsmakeAspect import CsmakeAspect
 
 class DIBRunPartsAspect(CsmakeAspect):
     """Purpose: To modify the run-dib-parts processing with a workaround.

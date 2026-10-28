@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # </copyright>
-from Csmake.CsmakeModule import CsmakeModule
+from CsmakeCore.CsmakeModule import CsmakeModule
 import os.path
 import argparse
 import collections
@@ -22,9 +22,10 @@ import os
 import sys
 import subprocess
 import shutil
-import StringIO
-import ConfigParser
+import io
+import configparser
 import pickle
+import base64
 
 class DIBInit(CsmakeModule):
     """Purpose: Prepare to process elements for a disk-image-builder run
@@ -212,7 +213,7 @@ class DIBInit(CsmakeModule):
         return result == 0
 
     def _getfattrElement(self, filename):
-        stdoutstring = StringIO.StringIO()
+        stdoutstring = io.StringIO()
         try:
             result = subprocess.call(
                 'getfattr -n user.element %s' % filename,
@@ -513,7 +514,7 @@ class DIBInit(CsmakeModule):
         return result == 0
 
     def _setupLogConfig(self, dibenv):
-        dibenv['logconfig'] = ConfigParser.RawConfigParser()
+        dibenv['logconfig'] = configparser.RawConfigParser()
         dibenv['logconfig'].optionxform = str
         startImage = 'start-logfilename' in dibenv
         if startImage:
@@ -529,9 +530,10 @@ class DIBInit(CsmakeModule):
                 if dibenv['logconfig'].has_option('environment', 'pickle'):
                     try:
                         dibenv['startenv'] = pickle.loads(
-                            dibenv['logconfig'].get(
-                                'environment',
-                                'pickle' ) )
+                            base64.b64decode(
+                                dibenv['logconfig'].get(
+                                    'environment',
+                                    'pickle' ) ) )
                         if 'IMAGE_ELEMENT' in dibenv['startenv']:
                             dibenv['start-elements'] = dibenv['startenv']['IMAGE_ELEMENT'].split(' ')
                         if 'ELEMENT_PATH' in dibenv['startenv']:
@@ -557,9 +559,10 @@ class DIBInit(CsmakeModule):
         if dibenv['logconfig'].has_section('environment'):
             if dibenv['logconfig'].has_option('environment', 'pickle'):
                 try:
-                    dibenv['shellenv'] = pickle.loads(dibenv['logconfig'].get(
-                        'environment',
-                        'pickle' ) )
+                    dibenv['shellenv'] = pickle.loads(base64.b64decode(
+                        dibenv['logconfig'].get(
+                            'environment',
+                            'pickle' ) ) )
                 except:
                     self.log.exception(
                         "Couldn't load the previous build shell environment")
@@ -780,7 +783,7 @@ class DIBInit(CsmakeModule):
 
     def _setupCleanupDibEnv(self, options):
         dibenv = {}
-        for option, value in options.iteritems():
+        for option, value in options.items():
             dibenv[option] = value
         dibenv['TARGET_ROOT'] = os.path.join(dibenv['build-dir'], 'build')
         self.env.env['TARGET_ROOT'] = dibenv['TARGET_ROOT']
